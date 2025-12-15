@@ -1,57 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="dashboard">Dashboard</title>
+    <title>工作台</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 <header class="topbar">
-    <h1 data-i18n="dashboard">Dashboard</h1>
+    <h1>工作台</h1>
     <div class="toggles">
-        <button id="theme-toggle" class="chip" data-i18n="toggleTheme">Toggle Theme</button>
-        <button id="lang-toggle" class="chip" data-i18n="toggleLang">中 / EN</button>
+        {% if user.is_admin %}
+        <a href="/admin/dashboard" class="btn">后台管理</a>
+        {% endif %}
+        <span>{{ user.email }}</span>
+        <a href="/" class="btn ghost" onclick="document.cookie='access_token=; Max-Age=0; path=/'; localStorage.removeItem('token');">退出</a>
     </div>
 </header>
 
 <section class="panel">
-    <h2 data-i18n="addWord">Add Word</h2>
+    <h2>添加单词</h2>
     <form id="add-word-form">
         <div class="grid">
-            <label data-i18n="english">English
+            <label>英文
                 <input name="english" placeholder="hello">
             </label>
-            <label data-i18n="chinese">Chinese
+            <label>中文
                 <input name="chinese" placeholder="你好">
             </label>
-            <label data-i18n="pos">Part of speech
+            <label>词性
                 <input name="part_of_speech" placeholder="noun">
             </label>
         </div>
-        <label data-i18n="definition">Definition
+        <label>定义
             <textarea name="definition" placeholder="greeting used when meeting"></textarea>
         </label>
-        <label data-i18n="examples">Examples
+        <label>例句
             <textarea name="examples" placeholder="Hello, world!"></textarea>
         </label>
         <div class="actions">
-            <button class="btn" type="button" id="ai-complete" data-i18n="complete">AI Complete</button>
-            <button class="btn ghost" type="submit" data-i18n="save">Save</button>
+            <button class="btn" type="button" id="ai-complete">AI 补全</button>
+            <button class="btn ghost" type="submit">保存</button>
         </div>
-        <pre id="completion-output"></pre>
+        <pre id="completion-output" style="display: none;"></pre>
     </form>
 </section>
 
 <section class="panel">
-    <h2 data-i18n="myWords">My Words</h2>
+    <h2>我的单词</h2>
     <table>
         <thead>
         <tr>
-            <th data-i18n="english">English</th>
-            <th data-i18n="chinese">Chinese</th>
-            <th data-i18n="pos">POS</th>
-            <th data-i18n="definition">Definition</th>
+            <th>英文</th>
+            <th>中文</th>
+            <th>词性</th>
+            <th>定义</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
@@ -61,6 +65,9 @@
                 <td>{{ word.chinese }}</td>
                 <td>{{ word.part_of_speech }}</td>
                 <td>{{ word.definition }}</td>
+                <td>
+                    <button class="btn danger" onclick="deleteWord({{ word.id }})">删除</button>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -68,22 +75,33 @@
 </section>
 
 <section class="panel">
-    <h2 data-i18n="review">Review</h2>
+    <h2>背单词</h2>
     <form id="start-review">
-        <label data-i18n="mode">Mode
+        <label>模式
             <select name="mode">
-                <option value="en_to_zh">EN → ZH</option>
-                <option value="zh_to_en">ZH → EN</option>
+                <option value="en_to_zh">英 → 中</option>
+                <option value="zh_to_en">中 → 英</option>
             </select>
         </label>
-        <label data-i18n="count">Count
+        <label>数量
             <input name="count" type="number" value="5" min="1" max="30">
         </label>
-        <button class="btn" type="submit" data-i18n="start">Start</button>
+        <button class="btn" type="submit">开始</button>
     </form>
     <div id="review-area"></div>
 </section>
 
 <script src="/static/app.js"></script>
+<script>
+async function deleteWord(id) {
+    if(!confirm("确定删除吗？")) return;
+    const token = localStorage.getItem("token");
+    await fetch(`/words/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    location.reload();
+}
+</script>
 </body>
 </html>

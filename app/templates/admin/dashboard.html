@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>后台管理</h1>
+        <div class="actions">
+            <a href="/dashboard" class="btn ghost">返回工作台</a>
+        </div>
+    </header>
+    <div class="container">
+        
+        <div id="ai-config" class="panel">
+            <h2>AI 配置</h2>
+            <form id="ai-config-form">
+                <label>Provider
+                    <select name="provider">
+                        <option value="openai">OpenAI</option>
+                        <option value="gemini">Gemini</option>
+                    </select>
+                </label>
+                <label>API Key
+                    <input name="api_key" type="password">
+                </label>
+                <label>Model
+                    <input name="model" value="gpt-4o-mini">
+                </label>
+                <label>Temperature
+                    <input name="temperature" type="number" min="0" max="100" value="0">
+                </label>
+                <button class="btn" type="submit">保存配置</button>
+            </form>
+        </div>
+
+        <div id="user-management" class="panel">
+            <h2>用户管理</h2>
+            <table id="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+    </div>
+    <script src="/static/admin.js"></script>
+</body>
+</html>

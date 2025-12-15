@@ -1,47 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="register">Register - AI Word Notebook</title>
+    <title>注册 - AI 单词本</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 <div class="auth-container">
     <div class="auth-panel">
-        <h2 data-i18n="register">Register</h2>
+        <h2>注册</h2>
         <form id="register-form">
             <div class="form-group">
-                <label>Email</label>
+                <label>邮箱</label>
                 <input name="email" type="email" required placeholder="name@example.com">
             </div>
             <div class="form-group">
-                <label>Password</label>
+                <label>密码</label>
                 <input name="password" type="password" required placeholder="••••••••">
             </div>
-            <div class="grid">
-                <div class="form-group">
-                    <label data-i18n="language">Language</label>
-                    <select name="preferred_language">
-                        <option value="en">English</option>
-                        <option value="zh">中文</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="theme">Theme</label>
-                    <select name="preferred_theme">
-                        <option value="light" data-i18n="light">Light</option>
-                        <option value="dark" data-i18n="dark">Dark</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn full-width" type="submit" data-i18n="register">Register</button>
+            <!-- Defaults -->
+            <input type="hidden" name="preferred_language" value="zh">
+            <input type="hidden" name="preferred_theme" value="light">
+            
+            <button class="btn full-width" type="submit">注册</button>
         </form>
         <p class="auth-footer">
-            Already have an account? <a href="/login" data-i18n="login">Login</a>
+            已有账号？ <a href="/login">登录</a>
         </p>
         <p class="auth-footer">
-            <a href="/" data-i18n="backHome">Back to Home</a>
+            <a href="/">返回首页</a>
         </p>
     </div>
 </div>

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from .database import Base, engine, get_db
 from . import models
-from .routers import auth, users, words, review, config
+from .routers import auth, users, words, review, config, admin
 from .security import get_current_user, get_password_hash
 
 load_dotenv()
@@ -46,6 +46,7 @@ app.include_router(users.router)
 app.include_router(words.router)
 app.include_router(review.router)
 app.include_router(config.router)
+app.include_router(admin.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -83,3 +84,13 @@ def dashboard(
             "words": words,
         },
     )
+
+
+@app.get("/admin/dashboard", response_class=HTMLResponse)
+def admin_dashboard_page(
+    request: Request,
+    current_admin: models.User = Depends(get_current_user),
+):
+    if not current_admin.is_admin:
+        return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("admin/dashboard.html", {"request": request})

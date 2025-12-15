@@ -26,6 +26,8 @@ class Word(Base):
     english = Column(String, nullable=True)
     chinese = Column(String, nullable=True)
     phonetics = Column(Text, nullable=True)  # JSON
+    definition = Column(Text, nullable=True)
+    part_of_speech = Column(String, nullable=True)
     parts_of_speech = Column(Text, nullable=True)  # JSON
     examples = Column(Text, nullable=True)  # JSON
     created_at = Column(DateTime, default=datetime.utcnow)

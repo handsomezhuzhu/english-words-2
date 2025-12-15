@@ -30,10 +30,17 @@ class User(UserBase):
         from_attributes = True
 
 
+class UserUpdate(BaseModel):
+    is_admin: Optional[bool] = None
+
+
+
 class WordBase(BaseModel):
     english: Optional[str] = None
     chinese: Optional[str] = None
     phonetics: Optional[str] = None  # JSON string
+    definition: Optional[str] = None
+    part_of_speech: Optional[str] = None
     parts_of_speech: Optional[str] = None  # JSON string
     examples: Optional[str] = None  # JSON string
 

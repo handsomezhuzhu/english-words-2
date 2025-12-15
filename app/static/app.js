@@ -214,6 +214,8 @@ if (loginForm) {
       body: formData,
     });
     if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem("token", data.access_token);
       // Cookie is set by server, just redirect
       window.location.href = "/dashboard";
     } else {
