@@ -10,20 +10,31 @@ def complete_word(request: schemas.AICompletionRequest, db: Session) -> schemas.
         # Fallback to mock if not configured
         return _mock_complete(request)
 
+    if request.direction == "zh_to_en":
+        target_instruction = f"""
+        Target Chinese Word: "{request.word}"
+        Task: Translate this Chinese word to English and provide details for the English translation.
+        If there are multiple common English translations, pick the most common one as the main "word".
+        """
+    else:
+        target_instruction = f"""
+        Target English Word: "{request.word}"
+        """
+
     prompt = f"""
     You are a helpful assistant that provides dictionary data for language learning.
-    Target Word: "{request.word}"
+    {target_instruction}
     
     Please provide the following information in strict JSON format:
-    1. Phonetics (UK and US)
-    2. Parts of Speech (list with pos, English meaning, Chinese meaning)
+    1. Phonetics (UK and US) for the English word
+    2. Parts of Speech (list with pos, English meaning, Chinese meaning). For "meaningZh", provide VERY CONCISE Chinese definitions (1-4 words max). Avoid long descriptive sentences.
     3. Examples (list with English sentence and Chinese translation)
     4. Synonyms (list of strings)
     5. Antonyms (list of strings)
 
     Format:
     {{
-        "word": "{request.word}",
+        "word": "The English word",
         "phonetics": {{"uk": "...", "us": "..."}},
         "partsOfSpeech": [{{"pos": "...", "meaningEn": "...", "meaningZh": "..."}}],
         "examples": [{{"sentenceEn": "...", "sentenceZh": "..."}}],

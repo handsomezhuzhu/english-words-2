@@ -95,11 +95,18 @@ const completeButton = document.getElementById("ai-complete");
 if (completeButton) {
   completeButton.addEventListener("click", async () => {
     const formData = new FormData(addForm);
-    // The API expects 'word' and 'direction', but the form has 'english'
-    const payload = {
-        word: formData.get("english"),
-        direction: "en_to_zh"
-    };
+    const english = formData.get("english").trim();
+    const chinese = formData.get("chinese").trim();
+    
+    let payload = {};
+    if (english) {
+        payload = { word: english, direction: "en_to_zh" };
+    } else if (chinese) {
+        payload = { word: chinese, direction: "zh_to_en" };
+    } else {
+        alert("Please enter a word (English or Chinese)");
+        return;
+    }
     
     const res = await fetch("/words/complete", {
       method: "POST",
