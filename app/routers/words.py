@@ -34,8 +34,8 @@ def list_words(
 
 
 @router.post("/complete", response_model=schemas.AICompletionResponse)
-def complete_word(request: schemas.AICompletionRequest):
-    return ai.complete_word(request)
+def complete_word(request: schemas.AICompletionRequest, db: Session = Depends(get_db)):
+    return ai.complete_word(request, db)
 
 
 @router.delete("/{word_id}")

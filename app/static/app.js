@@ -95,7 +95,12 @@ const completeButton = document.getElementById("ai-complete");
 if (completeButton) {
   completeButton.addEventListener("click", async () => {
     const formData = new FormData(addForm);
-    const payload = Object.fromEntries(formData.entries());
+    // The API expects 'word' and 'direction', but the form has 'english'
+    const payload = {
+        word: formData.get("english"),
+        direction: "en_to_zh"
+    };
+    
     const res = await fetch("/words/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

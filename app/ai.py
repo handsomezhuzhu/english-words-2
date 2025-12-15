@@ -1,50 +1,109 @@
-from typing import Optional
-from . import schemas
+import json
+import httpx
+from sqlalchemy.orm import Session
+from . import schemas, models
 
+def complete_word(request: schemas.AICompletionRequest, db: Session) -> schemas.AICompletionResponse:
+    config = db.query(models.SystemConfig).first()
+    
+    if not config or not config.api_url or not config.api_key:
+        # Fallback to mock if not configured
+        return _mock_complete(request)
 
-EXAMPLE_SENTENCES = {
-    "hello": ["Hello, how are you?", "The teacher said hello to every student."],
-    "学习": ["我喜欢学习新的语言。", "每天学习一点点会有进步。"],
-}
+    prompt = f"""
+    You are a helpful assistant that provides dictionary data for language learning.
+    Target Word: "{request.word}"
+    
+    Please provide the following information in strict JSON format:
+    1. Phonetics (UK and US)
+    2. Parts of Speech (list with pos, English meaning, Chinese meaning)
+    3. Examples (list with English sentence and Chinese translation)
+    4. Synonyms (list of strings)
+    5. Antonyms (list of strings)
 
-
-def complete_word(request: schemas.AICompletionRequest) -> schemas.AICompletionResponse:
-    """A deterministic, offline AI completion stub.
-
-    In production you could replace this with a call to an LLM provider.
+    Format:
+    {{
+        "word": "{request.word}",
+        "phonetics": {{"uk": "...", "us": "..."}},
+        "partsOfSpeech": [{{"pos": "...", "meaningEn": "...", "meaningZh": "..."}}],
+        "examples": [{{"sentenceEn": "...", "sentenceZh": "..."}}],
+        "synonyms": ["..."],
+        "antonyms": ["..."]
+    }}
+    
+    Ensure the JSON is valid and contains no other text.
     """
-    
-    # In a real implementation, we would fetch the config here:
-    # db = next(get_db())
-    # config = db.query(models.SystemConfig).first()
-    # if config and config.api_url:
-    #     client = OpenAI(base_url=config.api_url, api_key=config.api_key)
-    # ...
-    
+
+    try:
+        headers = {
+            "Authorization": f"Bearer {config.api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # Determine endpoint - usually /v1/chat/completions
+        url = config.api_url.rstrip('/')
+        if not url.endswith('/chat/completions'):
+            url += '/chat/completions'
+
+        payload = {
+            "model": config.model,
+            "messages": [
+                {"role": "system", "content": "You are a dictionary API. Output JSON only."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.3
+        }
+
+        with httpx.Client(timeout=30.0) as client:
+            response = client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            content = data['choices'][0]['message']['content']
+            # Clean up potential markdown code blocks
+            if content.startswith("```json"):
+                content = content[7:]
+            if content.endswith("```"):
+                content = content[:-3]
+            content = content.strip()
+            
+            result = json.loads(content)
+            
+            # Map to schema
+            return schemas.AICompletionResponse(
+                word=result.get("word", request.word),
+                phonetics=schemas.Phonetics(**result.get("phonetics", {})),
+                partsOfSpeech=[schemas.PartOfSpeech(**p) for p in result.get("partsOfSpeech", [])],
+                examples=[schemas.Example(**e) for e in result.get("examples", [])],
+                synonyms=result.get("synonyms", []),
+                antonyms=result.get("antonyms", []),
+                direction=request.direction
+            )
+
+    except Exception as e:
+        print(f"AI Error: {e}")
+        return _mock_complete(request)
+
+
+def _mock_complete(request: schemas.AICompletionRequest) -> schemas.AICompletionResponse:
     word = request.word
     direction = request.direction
 
     # Mock data generation
     if direction == "en_to_zh":
-        phonetics = schemas.Phonetics(uk="/həˈləʊ/", us="/həˈloʊ/")
+        phonetics = schemas.Phonetics(uk="/mock/", us="/mock/")
         parts = [
-            schemas.PartOfSpeech(pos="noun", meaningEn="A greeting", meaningZh="问候"),
-            schemas.PartOfSpeech(pos="verb", meaningEn="To say hello", meaningZh="打招呼"),
+            schemas.PartOfSpeech(pos="noun", meaningEn="A mock definition", meaningZh="模拟定义"),
         ]
         examples = [
-            schemas.Example(sentenceEn=f"Hello, is anyone there?", sentenceZh="你好，有人在吗？"),
-            schemas.Example(sentenceEn=f"She said hello to him.", sentenceZh="她向他打招呼。"),
+            schemas.Example(sentenceEn=f"This is a mock example for {word}.", sentenceZh=f"这是 {word} 的模拟例句。"),
         ]
-        synonyms = ["hi", "greetings"]
-        antonyms = ["goodbye"]
+        synonyms = ["mock"]
+        antonyms = []
     else:
         phonetics = schemas.Phonetics(uk="", us="")
-        parts = [
-            schemas.PartOfSpeech(pos="noun", meaningEn="Example meaning", meaningZh="示例意思"),
-        ]
-        examples = [
-            schemas.Example(sentenceEn="This is an example.", sentenceZh="这是一个示例。"),
-        ]
+        parts = []
+        examples = []
         synonyms = []
         antonyms = []
 
