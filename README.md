@@ -1,88 +1,137 @@
-# AI 单词本
+# AI 单词本 (AI Word Notebook)
 
-双语、AI 辅助的词汇本，具备艾宾浩斯复习功能，使用 SQLite 存储，支持单容器 Docker 部署。
+借助 AI 补全和艾宾浩斯记忆的双语单词管理工具。
+基于 FastAPI + SQLite + Vanilla JS 构建，支持 Docker 一键部署。
 
-## 功能
-- 用户注册/登录（JWT），管理员用户列表，AI 提供商配置存储。
-- 添加部分信息的单词；离线 AI 桩代码返回带有例句和翻译的双语 JSON。
-- 艾宾浩斯式间隔重复复习，支持 英→中 或 中→英 模式，一键反馈结果。
-- 落地页和仪表盘支持浅色/深色主题切换和中/英界面文案。
-- 默认使用 SQLite 持久化；提供 Dockerfile 用于单容器部署；GitHub Action 构建最新镜像。
+![Dashboard Preview](docs/dashboard-preview.png)
+*(如果有截图可以放这里，没有可以忽略)*
 
-## 快速开始
+## ✨ 功能特性
 
-### 本地开发
+*   **AI 智能补全**：输入单词，自动生成音标、词性、中英文释义、例句、同义词和反义词（支持 OpenAI/Gemini 协议）。
+*   **双向复习**：支持“英译中”和“中译英”两种复习模式。
+*   **艾宾浩斯记忆**：内置科学的间隔重复算法（Spaced Repetition），自动安排复习计划。
+*   **多端适配**：响应式设计，完美支持桌面端和移动端。
+*   **极简部署**：使用 SQLite 数据库，单容器部署，无需复杂的中间件依赖。
 
-1. 创建并激活虚拟环境：
-   `ash
-   python -m venv .venv
-   # Windows:
-   .venv\Scripts\activate
-   # Linux/Mac:
-   # source .venv/bin/activate
-   `
+---
 
-2. 安装依赖：
-   `ash
-   pip install -r requirements.txt
-   `
+## 🚀 部署教程 (Deployment)
 
-3. 配置环境变量：
-   本项目使用环境变量进行配置。请复制示例文件 \.env.example\ 为 \.env\，并根据需要修改配置（如管理员密码、密钥等）：
-   `ash
-   # Windows
-   copy .env.example .env
-   
-   # Linux/Mac
-   cp .env.example .env
-   `
-   
-   \.env\ 文件内容示例：
-   `ini
-   ADMIN_EMAIL=admin@example.com
-   ADMIN_PASSWORD=admin_password_change_me
-   SECRET_KEY=super-secret-key-change-me
-   DATABASE_URL=sqlite:///./data.db
-   `
+推荐使用 Docker 进行部署，无需安装 Python 环境。
 
-4. 运行应用：
-   `ash
-   uvicorn app.main:app --reload
-   `
+### 方法一：使用 Docker Compose (推荐)
 
-访问 http://127.0.0.1:8000 进行注册、登录和管理单词。
+1.  **下载代码或仅下载 `docker-compose.yml`**
+    ```bash
+    git clone https://github.com/handsomezhuzhu/english-words-2.git
+    cd english-words-2
+    ```
 
-## Docker 部署
+2.  **配置环境变量**
+    复制配置文件模板：
+    ```bash
+    cp .env.example .env
+    ```
+    编辑 `.env` 文件，设置您的管理员账号、密钥等信息：
+    ```ini
+    # 管理员初始账号（首次启动自动创建）
+    ADMIN_EMAIL=admin@example.com
+    ADMIN_PASSWORD=your_secure_password
+    
+    # 系统密钥（用于加密 Token，生产环境务必修改）
+    SECRET_KEY=generate_a_long_random_string_here
+    
+    # 数据库路径（通常不需要改）
+    DATABASE_URL=sqlite:///./data/data.db
+    ```
 
-### 使用 Docker Compose (推荐)
+3.  **启动服务**
+    ```bash
+    # 拉取最新镜像并后台启动
+    docker-compose up -d
+    ```
+    服务启动后，访问 `http://localhost:8000` 即可使用。
+    数据会持久化保存在当前目录的 `data/` 文件夹下。
 
-1. 确保已安装 Docker 和 Docker Compose。
-2. 同样需要先配置 \.env\ 文件（参考上述步骤），Docker Compose 会自动读取其中的环境变量。
-3. 运行：
-   `ash
-   docker-compose up -d
-   `
-   应用将在端口 8000 上运行，数据将持久化在 \./data\ 目录中。
+### 方法二：直接使用 Docker Run
 
-### 手动构建镜像
+如果您不想使用 docker-compose，也可以直接运行命令：
 
-1. 构建镜像：
-   `ash
-   docker build -t ai-word-notebook .
-   `
+1.  **拉取镜像**
+    ```bash
+    docker pull ghcr.io/handsomezhuzhu/english-words-2/ai-word-notebook:latest
+    ```
 
-2. 运行容器：
-   `ash
-   docker run -p 8000:8000 --env-file .env -v E:\English-words-2/data:/app/data ai-word-notebook
-   `
+2.  **创建数据目录**
+    ```bash
+    mkdir -p data
+    ```
 
-## 测试
+3.  **运行容器**
+    请替换 `-e` 参数中的值为您自己的配置：
+    ```bash
+    docker run -d \
+      --name ai-word-notebook \
+      -p 8000:8000 \
+      -v $(pwd)/data:/app/data \
+      -e ADMIN_EMAIL="admin@example.com" \
+      -e ADMIN_PASSWORD="your_password" \
+      -e SECRET_KEY="your_secret_key" \
+      -e DATABASE_URL="sqlite:///./data/data.db" \
+      --restart unless-stopped \
+      ghcr.io/handsomezhuzhu/english-words-2/ai-word-notebook:latest
+    ```
 
-运行调度器测试：
+---
 
-`ash
-python -m pytest
-`
+## 🛠️ 配置 AI 服务
 
-## CI/CD
-工作流 \.github/workflows/docker-image.yml\ 会在推送到 \main\ 分支时构建并推送 \ghcr.io/<owner>/<repo>/ai-word-notebook:latest\。
+首次登录后（使用环境变量中配置的管理员账号），请先进行 AI 配置，否则无法使用“AI 补全”功能。
+
+1.  登录后，点击侧边栏的 **“后台管理”**（仅管理员可见）。
+2.  进入 **“系统配置”**。
+3.  填写您的 AI 服务商信息：
+    *   **Provider**: 选择 OpenAI 或 Gemini（通用协议）。
+    *   **API URL**: AI 服务的接口地址（例如 `https://api.openai.com/v1` 或您的中转代理地址）。
+    *   **API Key**: 您的 API 密钥。
+    *   **Model**: 使用的模型名称（如 `gpt-4o-mini`, `gpt-3.5-turbo` 等）。
+4.  保存配置。
+
+---
+
+## 💻 本地开发
+
+1.  **环境准备**
+    *   Python 3.10+
+    *   Git
+
+2.  **安装依赖**
+    ```bash
+    python -m venv .venv
+    # Windows
+    .venv\Scripts\activate
+    # Linux/Mac
+    source .venv/bin/activate
+    
+    pip install -r requirements.txt
+    ```
+
+3.  **运行**
+    ```bash
+    cp .env.example .env
+    # 编辑 .env 配置...
+    
+    uvicorn app.main:app --reload
+    ```
+
+---
+
+## 🔗 相关链接
+
+*   项目地址: [https://github.com/handsomezhuzhu/english-words-2](https://github.com/handsomezhuzhu/english-words-2)
+*   Docker 镜像: `ghcr.io/handsomezhuzhu/english-words-2/ai-word-notebook`
+
+## 📄 License
+
+MIT

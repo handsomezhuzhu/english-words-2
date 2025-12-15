@@ -85,30 +85,47 @@
 
             <section class="panel">
                 <h2>我的单词</h2>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>英文</th>
-                        <th>中文</th>
-                        <th>词性</th>
-                        <th>定义</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for word in words %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
                         <tr>
-                            <td>{{ word.english }}</td>
-                            <td>{{ word.chinese }}</td>
-                            <td>{{ word.part_of_speech }}</td>
-                            <td>{{ word.definition }}</td>
-                            <td>
-                                <button class="btn danger" onclick="deleteWord({{ word.id }})">删除</button>
-                            </td>
+                            <th>英文</th>
+                            <th>中文</th>
+                            <th>词性</th>
+                            <th>定义</th>
+                            <th>例句</th>
+                            <th>操作</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for word in words %}
+                            <tr data-id="{{ word.id }}" data-examples="{{ word.examples }}">
+                                <td>{{ word.english }}</td>
+                                <td>{{ word.chinese }}</td>
+                                <td>{{ word.part_of_speech }}</td>
+                                <td>{{ word.definition }}</td>
+                                <td>
+                                    {% if word.examples %}
+                                    <button class="btn ghost small example-btn" onclick="showExamples(this)">
+                                        <span class="text-desktop">查看</span>
+                                        <span class="text-mobile">查看例句</span>
+                                    </button>
+                                    <div class="hidden examples-data">{{ word.examples }}</div>
+                                    {% else %}
+                                    <span style="color: var(--muted);">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn small" onclick="editWord({{ word.id }})">编辑</button>
+                                        <button class="btn danger small" onclick="deleteWord({{ word.id }})">删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </div>
 
@@ -135,8 +152,50 @@
     </main>
 </div>
 
+<!-- Example Modal -->
+<div class="modal-overlay" id="example-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>例句</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body" id="modal-content"></div>
+    </div>
+</div>
+
 <script src="/static/app.js"></script>
 <script>
+    // Modal Logic
+    const modal = document.getElementById('example-modal');
+    const modalContent = document.getElementById('modal-content');
+
+    function showExamples(btn) {
+        // Find the hidden div next to the button
+        const content = btn.nextElementSibling.textContent;
+        // Try to parse if it's JSON, otherwise show text
+        try {
+            const jsonContent = JSON.parse(content);
+            let html = "";
+            jsonContent.forEach(ex => {
+                html += `<p><strong>${ex.sentenceEn}</strong><br><span style="color:var(--muted)">${ex.sentenceZh}</span></p><hr style="border:0; border-top:1px dashed var(--border); margin:1rem 0;">`;
+            });
+            modalContent.innerHTML = html;
+        } catch (e) {
+            modalContent.textContent = content;
+        }
+        
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
     // Tab Switching Logic
     function switchTab(tabId) {
         // Update Buttons

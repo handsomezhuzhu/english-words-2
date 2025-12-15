@@ -355,3 +355,214 @@ th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--bord
   text-decoration: none;
   font-weight: 500;
 }
+
+/* Loading Spinner */
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Ensure table doesn't squish too much */
+}
+
+/* Responsive Text Toggling */
+.text-mobile { display: none; }
+.text-desktop { display: inline; }
+
+/* Responsive Table to Cards on Mobile */
+@media (max-width: 768px) {
+  .text-mobile { display: inline; }
+  .text-desktop { display: none; }
+
+  .table-responsive {
+    overflow: visible; /* Disable scroll, use cards */
+  }
+
+  table {
+    display: block;
+    min-width: 0;
+  }
+
+  thead {
+    display: none; /* Hide headers */
+  }
+
+  tbody {
+    display: block;
+  }
+
+  tr {
+    display: block;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  td {
+    display: block;
+    text-align: left;
+    padding: 0.25rem 0;
+    border: none;
+    font-size: 0.95rem;
+  }
+
+  /* Specific Column Styling based on order */
+  
+  /* English (1st column) */
+  td:nth-of-type(1) {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  /* Chinese (2nd column) */
+  td:nth-of-type(2) {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  /* POS (3rd column) */
+  td:nth-of-type(3)::before {
+    content: "词性: ";
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  td:nth-of-type(3) {
+    display: inline-block;
+    margin-right: 1rem;
+    background: rgba(0,0,0,0.05);
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  /* Definition (4th column) */
+  td:nth-of-type(4) {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    border-top: 1px dashed var(--border);
+    padding-top: 0.5rem;
+  }
+
+  /* Examples (5th column) */
+  td:nth-of-type(5) {
+    margin-top: 0.5rem;
+    text-align: right; /* Move button to right */
+    position: absolute; /* Position relative to card */
+    top: 1rem;
+    right: 1rem;
+  }
+  
+  /* Reset position for actions */
+  tr {
+    position: relative;
+  }
+
+  /* Actions (6th column) */
+  td:nth-of-type(6) {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal {
+    background: var(--panel);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.modal-body {
+    white-space: pre-wrap;
+    line-height: 1.6;
+}

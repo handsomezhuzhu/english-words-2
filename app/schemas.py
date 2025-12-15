@@ -80,25 +80,7 @@ class SystemConfig(SystemConfigBase):
         from_attributes = True
 
 
-class ReviewRequest(BaseModel):
-    count: int
-    mode: str  # en_to_zh or zh_to_en
-
-
-class ReviewItem(BaseModel):
-    id: int
-    question: str
-    answer: str
-
-
-class ReviewAnswer(BaseModel):
-    grade: int  # 0: Don't know, 1: Unclear, 2: Know
-
-
-class AICompletionRequest(BaseModel):
-    word: str
-    direction: str = "en_to_zh"
-
+# --- Support Models (must be defined before use) ---
 
 class Phonetics(BaseModel):
     uk: Optional[str] = None
@@ -114,6 +96,29 @@ class PartOfSpeech(BaseModel):
 class Example(BaseModel):
     sentenceEn: str
     sentenceZh: str
+
+
+# --- Request/Response Models ---
+
+class ReviewRequest(BaseModel):
+    count: int
+    mode: str  # en_to_zh or zh_to_en
+
+
+class ReviewItem(BaseModel):
+    id: int
+    question: str
+    answer: str
+    examples: List[Example] = []
+
+
+class ReviewAnswer(BaseModel):
+    grade: int  # 0: Don't know, 1: Unclear, 2: Know
+
+
+class AICompletionRequest(BaseModel):
+    word: str
+    direction: str = "en_to_zh"
 
 
 class AICompletionResponse(BaseModel):

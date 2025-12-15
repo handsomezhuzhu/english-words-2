@@ -14,6 +14,15 @@ def create_word(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    # Check for duplicates
+    existing_word = db.query(models.Word).filter(
+        models.Word.owner_id == current_user.id,
+        models.Word.english == word.english
+    ).first()
+    
+    if existing_word:
+        raise HTTPException(status_code=400, detail="Word already exists")
+
     new_word = models.Word(owner_id=current_user.id, **word.dict())
     db.add(new_word)
     db.commit()
@@ -36,6 +45,32 @@ def list_words(
 @router.post("/complete", response_model=schemas.AICompletionResponse)
 def complete_word(request: schemas.AICompletionRequest, db: Session = Depends(get_db)):
     return ai.complete_word(request, db)
+
+
+@router.put("/{word_id}", response_model=schemas.Word)
+def update_word(
+    word_id: int,
+    word_update: schemas.WordCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    existing_word = db.query(models.Word).filter_by(id=word_id, owner_id=current_user.id).first()
+    if not existing_word:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    # Update fields
+    existing_word.english = word_update.english
+    existing_word.chinese = word_update.chinese
+    existing_word.part_of_speech = word_update.part_of_speech
+    existing_word.definition = word_update.definition
+    existing_word.examples = word_update.examples
+    
+    # Optional: Update other fields if they are in the request, or keep existing logic
+    # We stick to the main editable fields for now.
+
+    db.commit()
+    db.refresh(existing_word)
+    return existing_word
 
 
 @router.delete("/{word_id}")
