@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +7,40 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <header class="topbar">
-        <h1>后台管理</h1>
-        <div class="actions">
-            <a href="/dashboard" class="btn ghost">返回工作台</a>
+
+<!-- Mobile Header -->
+<header class="mobile-header">
+    <button class="menu-toggle" id="menu-toggle">☰</button>
+    <h2>后台管理</h2>
+</header>
+
+<div class="app-layout">
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>AI Word Notebook</h2>
         </div>
-    </header>
-    <div class="container">
+        
+        <div class="user-info">
+            管理员模式
+        </div>
+
+        <nav class="nav-links">
+            <a href="/dashboard" class="nav-btn">
+                🔙 返回工作台
+            </a>
+            <button class="nav-btn active">
+                ⚙️ 系统配置
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
         
         <div id="ai-config" class="panel">
             <h2>AI 配置</h2>
@@ -51,8 +78,30 @@
                 <tbody></tbody>
             </table>
         </div>
-        
-    </div>
-    <script src="/static/admin.js"></script>
+
+    </main>
+</div>
+
+<script src="/static/admin.js"></script>
+<script>
+    // Mobile Sidebar Logic (Replicated for Admin Page)
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if(menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+    }
+
+    if(overlay) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+</script>
 </body>
 </html>

@@ -7,101 +7,190 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-<header class="topbar">
-    <h1>工作台</h1>
-    <div class="toggles">
-        {% if user.is_admin %}
-        <a href="/admin/dashboard" class="btn">后台管理</a>
-        {% endif %}
-        <span>{{ user.email }}</span>
-        <a href="/" class="btn ghost" onclick="document.cookie='access_token=; Max-Age=0; path=/'; localStorage.removeItem('token');">退出</a>
-    </div>
+
+<!-- Mobile Header -->
+<header class="mobile-header">
+    <button class="menu-toggle" id="menu-toggle">☰</button>
+    <h2>AI 单词本</h2>
 </header>
 
-<section class="panel">
-    <h2>添加单词</h2>
-    <form id="add-word-form">
-        <div class="grid">
-            <label>英文
-                <input name="english" placeholder="hello">
-            </label>
-            <label>中文
-                <input name="chinese" placeholder="你好">
-            </label>
-            <label>词性
-                <input name="part_of_speech" placeholder="noun">
-            </label>
-        </div>
-        <label>定义
-            <textarea name="definition" placeholder="greeting used when meeting"></textarea>
-        </label>
-        <label>例句
-            <textarea name="examples" placeholder="Hello, world!"></textarea>
-        </label>
-        <div class="actions">
-            <button class="btn" type="button" id="ai-complete">AI 补全</button>
-            <button class="btn ghost" type="submit">保存</button>
-        </div>
-        <pre id="completion-output" style="display: none;"></pre>
-    </form>
-</section>
+<div class="app-layout">
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-<section class="panel">
-    <h2>我的单词</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>英文</th>
-            <th>中文</th>
-            <th>词性</th>
-            <th>定义</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for word in words %}
-            <tr>
-                <td>{{ word.english }}</td>
-                <td>{{ word.chinese }}</td>
-                <td>{{ word.part_of_speech }}</td>
-                <td>{{ word.definition }}</td>
-                <td>
-                    <button class="btn danger" onclick="deleteWord({{ word.id }})">删除</button>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</section>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>AI Word Notebook</h2>
+        </div>
+        
+        <div class="user-info">
+            {{ user.email }}
+        </div>
 
-<section class="panel">
-    <h2>背单词</h2>
-    <form id="start-review">
-        <label>模式
-            <select name="mode">
-                <option value="en_to_zh">英 → 中</option>
-                <option value="zh_to_en">中 → 英</option>
-            </select>
-        </label>
-        <label>数量
-            <input name="count" type="number" value="5" min="1" max="30">
-        </label>
-        <button class="btn" type="submit">开始</button>
-    </form>
-    <div id="review-area"></div>
-</section>
+        <nav class="nav-links">
+            <button class="nav-btn active" onclick="switchTab('vocab')">
+                📚 单词管理
+            </button>
+            <button class="nav-btn" onclick="switchTab('review')">
+                🧠 单词复习
+            </button>
+            {% if user.is_admin %}
+            <a href="/admin/dashboard" class="nav-btn">
+                ⚙️ 后台管理
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="nav-btn" onclick="logout()">
+                🚪 退出登录
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Tab: Vocabulary Management -->
+        <div id="tab-vocab" class="tab-pane active">
+            <section class="panel">
+                <h2>添加单词</h2>
+                <form id="add-word-form">
+                    <div class="grid">
+                        <label>英文
+                            <input name="english" placeholder="hello">
+                        </label>
+                        <label>中文
+                            <input name="chinese" placeholder="你好">
+                        </label>
+                        <label>词性
+                            <input name="part_of_speech" placeholder="noun">
+                        </label>
+                    </div>
+                    <label>定义
+                        <textarea name="definition" placeholder="greeting used when meeting"></textarea>
+                    </label>
+                    <label>例句
+                        <textarea name="examples" placeholder="Hello, world!"></textarea>
+                    </label>
+                    <div class="actions">
+                        <button class="btn" type="button" id="ai-complete">AI 补全</button>
+                        <button class="btn ghost" type="submit">保存</button>
+                    </div>
+                    <pre id="completion-output" style="display: none;"></pre>
+                </form>
+            </section>
+
+            <section class="panel">
+                <h2>我的单词</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>英文</th>
+                        <th>中文</th>
+                        <th>词性</th>
+                        <th>定义</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for word in words %}
+                        <tr>
+                            <td>{{ word.english }}</td>
+                            <td>{{ word.chinese }}</td>
+                            <td>{{ word.part_of_speech }}</td>
+                            <td>{{ word.definition }}</td>
+                            <td>
+                                <button class="btn danger" onclick="deleteWord({{ word.id }})">删除</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <!-- Tab: Review -->
+        <div id="tab-review" class="tab-pane">
+            <section class="panel">
+                <h2>背单词</h2>
+                <form id="start-review">
+                    <label>模式
+                        <select name="mode">
+                            <option value="en_to_zh">英 → 中</option>
+                            <option value="zh_to_en">中 → 英</option>
+                        </select>
+                    </label>
+                    <label>数量
+                        <input name="count" type="number" value="5" min="1" max="30">
+                    </label>
+                    <button class="btn" type="submit">开始</button>
+                </form>
+                <div id="review-area"></div>
+            </section>
+        </div>
+
+    </main>
+</div>
 
 <script src="/static/app.js"></script>
 <script>
-async function deleteWord(id) {
-    if(!confirm("确定删除吗？")) return;
-    const token = localStorage.getItem("token");
-    await fetch(`/words/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    location.reload();
-}
+    // Tab Switching Logic
+    function switchTab(tabId) {
+        // Update Buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = event.currentTarget;
+        if(activeBtn.tagName === 'BUTTON') activeBtn.classList.add('active');
+
+        // Update Panes
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+
+        // Close sidebar on mobile
+        if(window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+    }
+
+    // Mobile Sidebar Logic
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if(menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+    }
+
+    if(overlay) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Logout Logic
+    function logout() {
+        document.cookie = 'access_token=; Max-Age=0; path=/';
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    }
+
+    // Delete Word Logic
+    async function deleteWord(id) {
+        if(!confirm("确定删除吗？")) return;
+        const token = localStorage.getItem("token");
+        await fetch(`/words/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        location.reload();
+    }
 </script>
 </body>
 </html>
