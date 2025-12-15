@@ -25,14 +25,17 @@ class Word(Base):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     english = Column(String, nullable=True)
     chinese = Column(String, nullable=True)
-    part_of_speech = Column(String, nullable=True)
-    definition = Column(Text, nullable=True)
-    examples = Column(Text, nullable=True)
+    phonetics = Column(Text, nullable=True)  # JSON
+    parts_of_speech = Column(Text, nullable=True)  # JSON
+    examples = Column(Text, nullable=True)  # JSON
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Review scheduling
     next_review_at = Column(DateTime, default=datetime.utcnow)
-    easiness = Column(Integer, default=2)
-    review_interval_days = Column(Integer, default=1)
-
+    last_reviewed_at = Column(DateTime, nullable=True)
+    interval_index = Column(Integer, default=0)  # Index in the Ebbinghaus sequence
+    success_streak = Column(Integer, default=0)
+    
     owner = relationship("User", back_populates="words")
 
 

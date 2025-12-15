@@ -34,14 +34,14 @@ def start_review(
 @router.post("/{word_id}/result")
 def submit_result(
     word_id: int,
-    remembered: bool,
+    answer: schemas.ReviewAnswer,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
     word = db.query(models.Word).filter_by(id=word_id, owner_id=current_user.id).first()
     if not word:
         raise HTTPException(status_code=404, detail="Word not found")
-    scheduler.schedule_next(word, remembered)
+    scheduler.schedule_next(word, answer.grade)
     db.add(word)
     db.commit()
     return {"detail": "updated"}

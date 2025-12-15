@@ -107,11 +107,16 @@ if (completeButton) {
       null,
       2
     );
-    addForm.english.value = data.english;
-    addForm.chinese.value = data.chinese;
-    addForm.part_of_speech.value = data.part_of_speech;
-    addForm.definition.value = data.definition;
-    addForm.examples.value = data.examples.join("\n");
+    // Map complex response to simple form fields for now
+    addForm.english.value = data.word;
+    if (data.partsOfSpeech && data.partsOfSpeech.length > 0) {
+        addForm.chinese.value = data.partsOfSpeech.map(p => p.meaningZh).join("; ");
+        addForm.part_of_speech.value = data.partsOfSpeech.map(p => p.pos).join(", ");
+        addForm.definition.value = data.partsOfSpeech.map(p => `${p.pos}: ${p.meaningEn}`).join("\n");
+    }
+    if (data.examples && data.examples.length > 0) {
+        addForm.examples.value = data.examples.map(e => `${e.sentenceEn}\n${e.sentenceZh}`).join("\n\n");
+    }
   });
 }
 
@@ -137,36 +142,69 @@ if (reviewForm) {
     items.forEach((item) => {
       const card = document.createElement("div");
       card.className = "card";
-      card.innerHTML = `<p>${item.question}</p>`;
-      const known = document.createElement("button");
-      known.className = "btn";
-      known.textContent = "👍";
-      known.onclick = () => submitResult(item.id, true, card);
-      const fuzzy = document.createElement("button");
-      fuzzy.className = "btn ghost";
-      fuzzy.textContent = "🤔";
-      fuzzy.onclick = () => submitResult(item.id, false, card);
+      card.innerHTML = `<p class="question">${item.question}</p>`;
+      
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const knowBtn = document.createElement("button");
+      knowBtn.className = "btn success";
+      knowBtn.textContent = "I know it (2)";
+      knowBtn.onclick = () => submitResult(item.id, 2, card);
+
+      const unclearBtn = document.createElement("button");
+      unclearBtn.className = "btn warning";
+      unclearBtn.textContent = "Unclear (1)";
+      unclearBtn.onclick = () => submitResult(item.id, 1, card);
+
+      const dontKnowBtn = document.createElement("button");
+      dontKnowBtn.className = "btn danger";
+      dontKnowBtn.textContent = "Don't know (0)";
+      dontKnowBtn.onclick = () => submitResult(item.id, 0, card);
+
       const answer = document.createElement("div");
+      answer.className = "answer hidden";
       answer.textContent = item.answer;
+      
+      // Show answer on click or hover? For now just show it.
+      // Or maybe show answer after clicking a button? 
+      // Usually flashcards show answer then ask for grade.
+      // Let's add a "Show Answer" button first.
+      
+      const showAnswerBtn = document.createElement("button");
+      showAnswerBtn.className = "btn";
+      showAnswerBtn.textContent = "Show Answer";
+      showAnswerBtn.onclick = () => {
+          answer.classList.remove("hidden");
+          showAnswerBtn.remove();
+          actions.appendChild(knowBtn);
+          actions.appendChild(unclearBtn);
+          actions.appendChild(dontKnowBtn);
+      };
+
+      card.appendChild(showAnswerBtn);
       card.appendChild(answer);
-      card.appendChild(known);
-      card.appendChild(fuzzy);
+      card.appendChild(actions);
       container.appendChild(card);
     });
   });
 }
 
-async function submitResult(id, remembered, card) {
+async function submitResult(id, grade, card) {
   const token = localStorage.getItem("token");
-  await fetch(`/review/${id}/result?remembered=${remembered}`, {
+  await fetch(`/review/${id}/result`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+    },
+    body: JSON.stringify({ grade: grade })
   });
   card.remove();
 }
 
 // capture token when logging in via form submission
-const loginForm = document.querySelector('form[action="/auth/token"]');
+const loginForm = document.getElementById("login-form");
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -176,8 +214,7 @@ if (loginForm) {
       body: formData,
     });
     if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem("token", data.access_token);
+      // Cookie is set by server, just redirect
       window.location.href = "/dashboard";
     } else {
       alert("Login failed");
@@ -185,7 +222,7 @@ if (loginForm) {
   });
 }
 
-const registerForm = document.querySelector('form[action="/auth/register"]');
+const registerForm = document.getElementById("register-form");
 if (registerForm) {
   registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -197,6 +234,7 @@ if (registerForm) {
     });
     if (res.ok) {
       alert("Registered! Now login.");
+      window.location.href = "/login";
     } else {
       alert("Registration failed");
     }

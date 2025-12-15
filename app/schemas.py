@@ -33,9 +33,9 @@ class User(UserBase):
 class WordBase(BaseModel):
     english: Optional[str] = None
     chinese: Optional[str] = None
-    part_of_speech: Optional[str] = None
-    definition: Optional[str] = None
-    examples: Optional[str] = None
+    phonetics: Optional[str] = None  # JSON string
+    parts_of_speech: Optional[str] = None  # JSON string
+    examples: Optional[str] = None  # JSON string
 
 
 class WordCreate(WordBase):
@@ -45,7 +45,8 @@ class WordCreate(WordBase):
 class Word(WordBase):
     id: int
     next_review_at: datetime
-    review_interval_days: int
+    interval_index: int
+    success_streak: int
 
     class Config:
         from_attributes = True
@@ -82,17 +83,36 @@ class ReviewItem(BaseModel):
     answer: str
 
 
+class ReviewAnswer(BaseModel):
+    grade: int  # 0: Don't know, 1: Unclear, 2: Know
+
+
 class AICompletionRequest(BaseModel):
-    english: Optional[str] = None
-    chinese: Optional[str] = None
-    part_of_speech: Optional[str] = None
-    definition: Optional[str] = None
+    word: str
+    direction: str = "en_to_zh"
+
+
+class Phonetics(BaseModel):
+    uk: Optional[str] = None
+    us: Optional[str] = None
+
+
+class PartOfSpeech(BaseModel):
+    pos: str
+    meaningEn: Optional[str] = None
+    meaningZh: Optional[str] = None
+
+
+class Example(BaseModel):
+    sentenceEn: str
+    sentenceZh: str
 
 
 class AICompletionResponse(BaseModel):
-    english: str
-    chinese: str
-    part_of_speech: str
-    definition: str
-    examples: List[str]
-    translation: List[str]
+    word: str
+    phonetics: Optional[Phonetics] = None
+    partsOfSpeech: List[PartOfSpeech] = []
+    examples: List[Example] = []
+    synonyms: List[str] = []
+    antonyms: List[str] = []
+    direction: str

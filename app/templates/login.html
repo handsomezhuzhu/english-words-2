@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login">Login - AI Word Notebook</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-panel">
+        <h2 data-i18n="login">Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input name="username" type="email" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input name="password" type="password" required placeholder="••••••••">
+            </div>
+            <button class="btn full-width" type="submit" data-i18n="login">Login</button>
+        </form>
+        <p class="auth-footer">
+            Don't have an account? <a href="/register" data-i18n="register">Register</a>
+        </p>
+        <p class="auth-footer">
+            <a href="/" data-i18n="backHome">Back to Home</a>
+        </p>
+    </div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
