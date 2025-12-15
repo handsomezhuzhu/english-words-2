@@ -13,6 +13,14 @@ def complete_word(request: schemas.AICompletionRequest) -> schemas.AICompletionR
 
     In production you could replace this with a call to an LLM provider.
     """
+    
+    # In a real implementation, we would fetch the config here:
+    # db = next(get_db())
+    # config = db.query(models.SystemConfig).first()
+    # if config and config.api_url:
+    #     client = OpenAI(base_url=config.api_url, api_key=config.api_key)
+    # ...
+    
     word = request.word
     direction = request.direction
 

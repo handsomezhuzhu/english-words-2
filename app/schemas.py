@@ -62,6 +62,7 @@ class Word(WordBase):
 class SystemConfigBase(BaseModel):
     provider: str = "openai"
     api_key: Optional[str] = None
+    api_url: Optional[str] = None
     model: str = "gpt-4o-mini"
     temperature: int = 0
 

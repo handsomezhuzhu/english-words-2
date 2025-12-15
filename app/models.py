@@ -47,6 +47,7 @@ class SystemConfig(Base):
     id = Column(Integer, primary_key=True, index=True)
     provider = Column(String, default="openai")
     api_key = Column(String, nullable=True)
+    api_url = Column(String, nullable=True)
     model = Column(String, default="gpt-4o-mini")
     temperature = Column(Integer, default=0)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)

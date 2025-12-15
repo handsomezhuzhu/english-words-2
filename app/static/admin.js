@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("ai-config-form");
             if (config.provider) form.provider.value = config.provider;
             if (config.api_key) form.api_key.value = config.api_key;
+            if (config.api_url) form.api_url.value = config.api_url;
             if (config.model) form.model.value = config.model;
-            if (config.temperature) form.temperature.value = config.temperature;
         } catch (e) {
             console.error(e);
         }
@@ -60,8 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const payload = {
                 provider: formData.get("provider"),
                 api_key: formData.get("api_key"),
-                model: formData.get("model"),
-                temperature: Number(formData.get("temperature"))
+                api_url: formData.get("api_url"),
+                model: formData.get("model")
             };
 
             const res = await fetch("/admin/ai-config", {

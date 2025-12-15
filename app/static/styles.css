@@ -239,18 +239,48 @@ th, td {
     padding: 6rem 1rem;
     background-color: var(--panel);
     border-bottom: 1px solid var(--border);
+    animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .hero h1 {
     font-size: 3rem;
     font-weight: 800;
     margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--accent), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(30deg); }
+    100% { filter: hue-rotate(0deg); }
 }
 
 .hero p {
     font-size: 1.25rem;
     color: var(--muted);
     margin-bottom: 2rem;
+    animation: fadeIn 1.2s ease-out;
+}
+
+.hero .actions {
+    animation: fadeIn 1.4s ease-out;
+}
+
+.btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .page-section {
